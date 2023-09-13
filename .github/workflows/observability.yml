@@ -1,7 +1,7 @@
 name: Observability Stack 
 
 on:
-  workflow_call::
+  workflow_call:
 
 jobs:
   observability_stack:
