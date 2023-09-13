@@ -37,13 +37,13 @@ jobs:
             alias vkpr="rit vkpr"
             rit set credential --provider="aws" \
                 --fields="accesskeyid,region,secretaccesskey" \
-                --values="${{'${{'}} secrets.AWS_ACCESS_KEY ${{'}}'}},${{'${{'}} secrets.AWS_REGION ${{'}}'}},${{'${{'}} secrets.AWS_SECRET_KEY ${{'}}'}}" 
+                --values="${{ secrets.AWS_ACCESS_KEY }},${{ secrets.AWS_REGION }},${{ secrets.AWS_SECRET_KEY  }}" 
 
       - name: Vkpr apply
         run: |
           
           alias vkpr="rit vkpr"
-          aws eks update-kubeconfig --name ${{'${{'}} secrets.CLUSTER_NAME${{'}}'}} --region ${{'${{'}} secrets.AWS_REGION${{'}}'}}
+          aws eks update-kubeconfig --name ${{ secrets.CLUSTER_NAME}} --region ${{ secrets.AWS_REGION }}
           rit vkpr apply --path_to_file="$(pwd)/vkpr.yaml"
 
       - name: Upload kubeconfig file as artefact
