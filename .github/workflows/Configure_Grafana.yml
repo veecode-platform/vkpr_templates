@@ -1,0 +1,35 @@
+name: Configure Datasource
+
+on:
+  workflow_call:
+   secrets:
+     GRAFANA_PASS:
+       required: false
+
+jobs:
+  Configure_datasource:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Curl to Grafana API to generate a key
+        shell: bash
+        run: |
+          DOMAIN="$(yq -e '.global.domain' ./vkpr.yaml)"
+          echo "domain=$DOMAIN" >> $GITHUB_ENV
+          GRAFANA_PASS=${{ secrets.GRAFANA_PASS }}
+            if [ -n "$GRAFANA_PASS" ]; then
+             GRAFANA_API_KEY="$(curl -s -X POST -H "Content-Type: application/json" -d '{"name": "admin","role": "Admin"}' https://admin:${{ secrets.GRAFANAPASS }}@grafana.${{ env.domain }}/api/auth/keys | jq -r .key)"
+            else
+             GRAFANA_API_KEY="$(curl -s -X POST -H "Content-Type: application/json" -d '{"name": "admin","role": "Admin"}' https://admin:vkpr123@grafana.${{ env.domain }}/api/auth/keys | jq -r .key)"
+          echo "grafana_api_key=$GRAFANA_API_KEY" >> $GITHUB_ENV
+
+      ### Adding Jaeger as grafana's datasource 
+      - name: Curl to Grafana API to add Jaeger as grafana's datasource 
+        shell: bash
+        run: |
+          curl -X POST \
+            -H "Authorization: Bearer ${{ env.grafana_api_key }}" \
+            -H "Accept: application/json" \
+            -H "Content-Type: application/json" \
+            -d  @jaeger-datasource.json \
+            --url https://grafana.${{ env.domain }}/api/datasources
