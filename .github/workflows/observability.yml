@@ -51,7 +51,7 @@ jobs:
           aws eks update-kubeconfig --name ${{ secrets.CLUSTER_NAME}} --region ${{ secrets.AWS_REGION }}
           GRAFANA_PASS=${{ secrets.GRAFANA_PASS }}
             if [ -n "$GRAFANA_PASS" ]; then
-                yq -i "prometheus-stack.grafana.adminPassword = \"$GRAFANA_PASSD\"" $PWD/vkpr.yaml
+                yq -i "prometheus-stack.grafana.adminPassword = \"$GRAFANA_PASS\"" $PWD/vkpr.yaml
             fi
           rit vkpr apply --path_to_file="$(pwd)/vkpr.yaml"
 
