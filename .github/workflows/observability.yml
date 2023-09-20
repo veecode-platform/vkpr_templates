@@ -44,15 +44,14 @@ jobs:
                 --values="${{ secrets.AWS_ACCESS_KEY }},${{ secrets.AWS_REGION }},${{ secrets.AWS_SECRET_KEY  }}" 
 
       - name: Vkpr apply
-        env:
-          GRAFANA_PASS: ""
         run: |
           alias vkpr="rit vkpr"
           aws eks update-kubeconfig --name ${{ secrets.CLUSTER_NAME}} --region ${{ secrets.AWS_REGION }}
           GRAFANA_PASS=${{ secrets.GRAFANA_PASS }}
-            if [ -n "$GRAFANA_PASS" ]; then
-                yq -i "prometheus-stack.grafana.adminPassword = \"$GRAFANA_PASS\"" $PWD/vkpr.yaml
-            fi
+          if [ -n "$GRAFANA_PASS" ]; then
+            yq -i "prometheus-stack.grafana.adminPassword = \"$GRAFANA_PASS\"" ./vkpr.yaml
+          fi
+          cat ./vkpr.yaml
           rit vkpr apply --path_to_file="$(pwd)/vkpr.yaml"
 
       - name: Upload kubeconfig file as artefact
