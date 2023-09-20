@@ -49,7 +49,7 @@ jobs:
                 {%- if values.kong_mode != 'dbless' %}
                 rit set credential --provider="postgres" \
                 --fields="password,service" \
-                --values="${{ secrets.POSTGRES_PASSWORD$}},postgres" 
+                --values="${{ secrets.POSTGRES_PASSWORD }},postgres" 
                 {%- endif %}
 
       - name: Kong License and Admin Password
@@ -69,7 +69,7 @@ jobs:
         run: |
           shopt -s expand_aliases
           alias vkpr="rit vkpr"
-          aws eks update-kubeconfig --name ${{ secrets.CLUSTER_NAME}} --region ${{ secrets.AWS_REGION }}
+          aws eks update-kubeconfig --name ${{ secrets.CLUSTER_NAME }} --region ${{ secrets.AWS_REGION }}
           vkpr apply --path_to_file="$(pwd)/vkpr.yaml"
 
       - name: Upload kubeconfig file as artefact
