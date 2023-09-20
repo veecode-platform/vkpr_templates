@@ -43,7 +43,7 @@ jobs:
         run: |
             shopt -s expand_aliases
             alias vkpr="rit vkpr"
-            MODE="$(.vkpr/bin/yq -e '.kong.mode' vkpr.yaml)"
+            MODE=` yq -e '.kong.mode' vkpr.yaml `"
             echo $MODE
             rit set credential --provider="aws" \
                 --fields="accesskeyid,region,secretaccesskey" \
