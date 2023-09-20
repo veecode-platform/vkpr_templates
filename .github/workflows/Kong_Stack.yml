@@ -43,10 +43,10 @@ jobs:
         run: |
             shopt -s expand_aliases
             alias vkpr="rit vkpr"
+            MODE="$(.vkpr/bin/yq -e '.kong.mode' vkpr.yaml)"
             rit set credential --provider="aws" \
                 --fields="accesskeyid,region,secretaccesskey" \
                 --values="${{ secrets.AWS_ACCESS_KEY }},${{ secrets.AWS_REGION }},${{ secrets.AWS_SECRET_KEY }}" 
-            MODE="$(yq -e '.kong.mode' ./vkpr.yaml)"
             if [ $MODE != 'dbless']; then
               POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
               if [ -n "$POSTGRES_PASSWORD" ]; then
