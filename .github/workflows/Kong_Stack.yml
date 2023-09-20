@@ -48,7 +48,7 @@ jobs:
             rit set credential --provider="aws" \
                 --fields="accesskeyid,region,secretaccesskey" \
                 --values="${{ secrets.AWS_ACCESS_KEY }},${{ secrets.AWS_REGION }},${{ secrets.AWS_SECRET_KEY }}" 
-            if [ $MODE != 'dbless']; then
+            if [ "$MODE" != 'dbless']; then
               POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
               if [ -n "$POSTGRES_PASSWORD" ]; then
                 rit set credential --provider="postgres" \
