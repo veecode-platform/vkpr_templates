@@ -17,7 +17,14 @@ on:
        required: false
      KONG_LICENSE:
        required: false
-
+     EXTERNAL_DB_HOST:
+       required: false
+     EXTERNAL_DB_USER:
+       required: false
+     EXTERNAL_DB_DATABASE:
+       required: false
+     EXTERNAL_DB_PASSWORD:
+       required: false
 jobs:
   kong_stack:
     runs-on: ubuntu-latest
@@ -76,6 +83,25 @@ jobs:
                 echo "$KONG_LICENSE" > license
                 yq -i ".kong.enterprise.license = \"$PWD/license\"" $PWD/vkpr.yaml
             fi
+
+      - name: Kong external database
+        run: |   
+            EXTERNAL_DB_HOST=${{ secrets.EXTERNAL_DB_HOST }}
+            EXTERNAL_DB_USER=${{ secrets.EXTERNAL_DB_USER }}
+            EXTERNAL_DB_DATABASE=${{ secrets.EXTERNAL_DB_DATABASE }}
+            EXTERNAL_DB_PASSWORD=${{ secrets.EXTERNAL_DB_PASSWORD }}
+            if [ -n "$EXTERNAL_DB_HOST" ]; then
+                yq -i ".kong.externalDb.host = \"$EXTERNAL_DB_HOST\"" $PWD/vkpr.yaml
+            fi
+            if [ -n "$EXTERNAL_DB_USER" ]; then
+                yq -i ".kong.externalDb.user = \"$EXTERNAL_DB_USER\"" $PWD/vkpr.yaml
+            fi
+            if [ -n "$EXTERNAL_DB_DATABASE" ]; then
+                yq -i ".kong.externalDb.database = \"$EXTERNAL_DB_DATABASE\"" $PWD/vkpr.yaml
+            fi
+            if [ -n "$EXTERNAL_DB_PASSWORD" ]; then
+                yq -i ".kong.externalDb.password = \"$EXTERNAL_DB_PASSWORD\"" $PWD/vkpr.yaml
+            fi           
 
       - name: Vkpr apply
         run: |
