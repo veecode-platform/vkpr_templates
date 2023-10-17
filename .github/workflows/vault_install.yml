@@ -1,0 +1,71 @@
+name: Vault Install
+
+on:
+  workflow_call:
+   secrets:
+     AWS_REGION:
+      required: true
+     AWS_ACCESS_KEY:
+       required: true
+     AWS_SECRET_KEY:
+       required: true     
+     AWS_KMS_KEY:
+       required: false
+     CLUSTER_NAME:
+       required: true
+
+jobs:
+  vault_install:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+          
+      - name: Install Vkpr
+        env:
+          RELEASE_VERSION: ${{ steps.vars.outputs.tag }}
+        shell: bash
+        run: |
+          curl -fsSL https://get.vkpr.net/ | CONTROL_SKIP="true" bash
+          rit update repo --name="vkpr-cli" --version=1.3.7
+
+      ### Configure VKPR Credentials
+      - name: config vkpr credentials
+        env:
+          MODE: ""
+        shell: bash
+        run: |
+            shopt -s expand_aliases
+            alias vkpr="rit vkpr"
+            AWS_KMS_KEY=${{ secrets.AWS_KMS_KEY }}
+            AWS_KMS_KEY_ENABLED=$(yq ".vault.autoUnseal" $PWD/vkpr.yaml)
+            if [ -n "$AWS_KMS_KEY" ]; then
+                if [ "$AWS_KMS_KEY_ENABLED" == "true" ]; then
+                  rit set credential --provider="aws" \
+                    --fields="accesskeyid,region,secretaccesskey,kmskeyid" \
+                    --values="${{ secrets.AWS_ACCESS_KEY }},${{ secrets.AWS_REGION }},${{ secrets.AWS_SECRET_KEY }},${{ secrets.AWS_KMS_KEY }}"
+                fi 
+            else
+              rit set credential --provider="aws" \
+                --fields="accesskeyid,region,secretaccesskey" \
+                --values="${{ secrets.AWS_ACCESS_KEY }},${{ secrets.AWS_REGION }},${{ secrets.AWS_SECRET_KEY }}" 
+            fi
+                
+      - name: Vkpr apply
+        run: |
+          shopt -s expand_aliases
+          alias vkpr="rit vkpr"
+          aws eks update-kubeconfig --name ${{ secrets.CLUSTER_NAME }} --region ${{ secrets.AWS_REGION }}
+          vkpr apply --path_to_file="$(pwd)/vkpr.yaml"
+
+      - name: Upload kubeconfig file as artefact
+        uses: actions/upload-artifact@v2
+        with:
+          name: kubeconfig
+          path: ~/.kube/config
