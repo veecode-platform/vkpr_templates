@@ -48,8 +48,8 @@ jobs:
             AWS_KMS_ENDPOINT=${{ secrets.AWS_KMS_ENDPOINT }}
             AWS_KMS_KEY=${{ secrets.AWS_KMS_KEY }}
             AWS_KMS_KEY_ENABLED=$(yq ".vault.autoUnseal" $PWD/vkpr.yaml)
-            if [ -n "$AWS_KMS_KEY" ] && [ -n "$AWS_KMS_ENDPOINT" ]; then
-                if [ "$AWS_KMS_KEY_ENABLED" == "true" ]; then
+            if [ -n "$AWS_KMS_KEY" ]; then
+                if [ "$AWS_KMS_KEY_ENABLED" == "aws" ]; then
                   rit set credential --provider="aws" \
                     --fields="accesskeyid,region,secretaccesskey,kmskeyid,kmsendpoint" \
                     --values="${{ secrets.AWS_ACCESS_KEY }},${{ secrets.AWS_REGION }},${{ secrets.AWS_SECRET_KEY }},${{ secrets.AWS_KMS_KEY }},${{ secrets.AWS_KMS_ENDPOINT }}"
