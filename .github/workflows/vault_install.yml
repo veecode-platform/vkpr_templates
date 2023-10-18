@@ -11,6 +11,8 @@ on:
        required: true     
      AWS_KMS_KEY:
        required: false
+     AWS_KMS_ENDPOINT:
+       required: false
      CLUSTER_NAME:
        required: true
 
